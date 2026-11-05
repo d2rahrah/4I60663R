@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DISCO</title>
+
+    <link rel="stylesheet" href="styles.css">
+    </head>
+
+    <body>
+
+    <div class="chat-window">
+
+    <!-- HEADER -->
+    <div class="header">
+
+    <div class="room-name" id="roomName">
+    -- ROOM --
+    </div>
+    <div class="token-display">
+    TOKENS: <span id="tokenBalance">0</span>
+    </div>
+    <button id="newIdBtn" class="new-id-btn">
+    NEW ID
+    </button>
+
+    </div>
+
+    <!-- CHAT -->
+    <div class="chat-log" id="messages">
+
+    <div class="message">
+    <span class="time">20:33</span>
+    <span class="user">[K4MZ2R]</span>
+    <span class="text">
+    : Yo i have legit strat for life,
+    maybe exponential growth until walls.
+    </span>
+    </div>
+
+    <div class="message">
+    <span class="time">20:35</span>
+    <span class="user">[GG533D]</span>
+    <span class="text">
+    : Show more or I call your bluff
+    </span>
+    </div>
+
+    <div class="message">
+    <span class="time">20:35</span>
+    <span class="user">[GG533D]</span>
+    <span class="text">
+    : }:>
+    </span>
+    </div>
+
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-bar">
+
+    <div class="prompt">&gt;</div>
+
+    <input
+    id="messageInput"
+    type="text"
+    placeholder="Type message..."
+    autocomplete="off"
+    >
+
+    </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+    </body>
+    </html>
