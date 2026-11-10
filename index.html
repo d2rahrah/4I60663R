@@ -1,82 +1,60 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>DISCO</title>
+	<title>DISCO</title>
 
-    <link rel="stylesheet" href="styles.css">
-    </head>
+	<link rel="stylesheet" href="styles.css">
+</head>
 
-    <body>
+<body>
 
-    <div class="chat-window">
+	<div class="chat-window">
 
-    <!-- HEADER -->
-    <div class="header">
+		<!-- HEADER -->
+		<div class="header">
 
-    <div class="room-name" id="roomName">
-    -- ROOM --
-    </div>
-    <div class="token-display">
-    TOKENS: <span id="tokenBalance">0</span>
-    </div>
-    <button id="newIdBtn" class="new-id-btn">
-    NEW ID
-    </button>
+			<div class="room-name" id="roomName">
+				-- ROOM --
+			</div>
 
-    </div>
+			<div class="token-display">
+				TOKENS: <span id="tokenBalance">0</span>
+			</div>
 
-    <!-- CHAT -->
-    <div class="chat-log" id="messages">
+			<button id="changeRoomBtn" class="new-id-btn">ROOM</button>
 
-    <div class="message">
-    <span class="time">20:33</span>
-    <span class="user">[K4MZ2R]</span>
-    <span class="text">
-    : Yo i have legit strat for life,
-    maybe exponential growth until walls.
-    </span>
-    </div>
+			<button id="newIdBtn" class="new-id-btn" hidden>NEW ID</button>
 
-    <div class="message">
-    <span class="time">20:35</span>
-    <span class="user">[GG533D]</span>
-    <span class="text">
-    : Show more or I call your bluff
-    </span>
-    </div>
+		</div>
 
-    <div class="message">
-    <span class="time">20:35</span>
-    <span class="user">[GG533D]</span>
-    <span class="text">
-    : }:>
-    </span>
-    </div>
+		<!-- CHAT -->
+		<div class="chat-log" id="messages"></div>
 
-    </div>
+		<!-- INPUT -->
+		<div class="input-bar">
 
-    <!-- INPUT -->
-    <div class="input-bar">
+			<div class="prompt">&gt;</div>
 
-    <div class="prompt">&gt;</div>
+			<input
+				id="messageInput"
+				type="text"
+				placeholder="Type message..."
+				autocomplete="off"
+			>
 
-    <input
-    id="messageInput"
-    type="text"
-    placeholder="Type message..."
-    autocomplete="off"
-    >
+		</div>
 
-    </div>
+	</div>
 
-    </div>
+	<!-- Firebase (must load before script.js) -->
+	<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-    <script src="script.js"></script>
+	<script src="script.js"></script>
 
-    </body>
-    </html>
+</body>
+</html>
