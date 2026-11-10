@@ -1,266 +1,324 @@
+/* =================================
+DISCO - CHAT SYSTEM
+================================= */
 
-		/* =================================
-		DISCO - CHAT SYSTEM
-		================================= */
 
+/* HTML ELEMENTS */
 
-		/* HTML ELEMENTS */
+const messages = document.getElementById("messages");
+const input = document.getElementById("messageInput");
+const newIdBtn = document.getElementById("newIdBtn");
+const changeRoomBtn = document.getElementById("changeRoomBtn");
+const roomName = document.getElementById("roomName");
 
-		const messages = document.getElementById("messages");
-		const input = document.getElementById("messageInput");
-		const newIdBtn = document.getElementById("newIdBtn");
-		const roomName = document.getElementById("roomName");
 
+/* =================================
+FIREBASE
+================================= */
 
-		/* =================================
-		CODE GENERATORS
-		================================= */
+firebase.initializeApp({
+	databaseURL: "https://xhat667-default-rtdb.europe-west1.firebasedatabase.app"
+});
 
-		function generateCode() {
+const db = firebase.database();
+let roomQuery = null;
 
-			const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function joinRoom() {
 
-			let code = "";
+	if (roomQuery) roomQuery.off();   // stop listening to the old room
 
-			for (let i = 0; i < 6; i++) {
+	roomQuery = db.ref("rooms/" + roomCode + "/messages").limitToLast(50);
 
-				code += chars[
-					Math.floor(Math.random() * chars.length)
-					];
+	roomQuery.on("child_added", (snap) => {
+		const m = snap.val();
+		addMessage(m.text, m.user, m.ts);
+	});
+}
 
-				}
 
-				return code;
+/* =================================
+CODE GENERATORS
+================================= */
 
-				}
+function generateCode() {
 
+	const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-				/* =================================
-				USER ID
-				================================= */
+	let code = "";
 
-				let userCode = localStorage.getItem("userCode");
+	for (let i = 0; i < 6; i++) {
+		code += chars[Math.floor(Math.random() * chars.length)];
+	}
 
-				if (!userCode) {
+	return code;
+}
 
-					userCode = generateCode();
 
-					localStorage.setItem("userCode", userCode);
+/* =================================
+USER ID
+================================= */
 
-					}
+let userCode = localStorage.getItem("userCode");
 
+if (!userCode) {
+	userCode = generateCode();
+	localStorage.setItem("userCode", userCode);
+}
 
-				/* =================================
-				ROOM ID
-				================================= */
 
-				let roomCode = localStorage.getItem("roomCode");
+/* =================================
+ROOM ID
+================================= */
 
-				if (!roomCode) {
+function normalizeRoom(code) {
+	return String(code || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+}
 
-					roomCode = generateCode();
+// Priority: ?room=CODE in the link > saved room > new random room
+const urlRoom = normalizeRoom(new URLSearchParams(location.search).get("room"));
+let roomCode = urlRoom || localStorage.getItem("roomCode") || generateCode();
 
-					localStorage.setItem("roomCode", roomCode);
+function setRoom(code, announce = true) {
 
-					}
+	roomCode = code;
 
-				roomName.textContent = "-- " + roomCode + " --";
+	localStorage.setItem("roomCode", roomCode);
 
+	roomName.textContent = "-- " + roomCode + " --";
 
-				/* =================================
-				SETTINGS
-				================================= */
+	// keep other URL parameters (like ?dev) when changing room
+	const p = new URLSearchParams(location.search);
+	p.set("room", roomCode);
+	history.replaceState(null, "", "?" + p.toString());
 
-				let autoScroll = true;
+	if (announce) {
+		messages.innerHTML = "";   // clear the old room's messages
+		addMessage("Joined room: " + roomCode, "SYSTEM");
+	}
 
+	joinRoom();
+}
 
-				/* =================================
-				MESSAGE CREATOR
-				================================= */
+if (changeRoomBtn) {
+	changeRoomBtn.addEventListener("click", () => {
 
-				function addMessage(text, user = userCode) {
+		const entered = prompt(
+			"Enter a room code (letters/numbers, 3-12 chars).\nLeave empty for a new random room:"
+		);
 
-					const msg = document.createElement("div");
+		if (entered === null) return;   // cancelled
 
-					msg.className = "message";
+		const code = normalizeRoom(entered) || generateCode();
 
-					const time = new Date();
+		if (code.length < 3) {
+			addMessage("Room code too short.", "SYSTEM");
+			return;
+		}
 
-					const hh = String(time.getHours()).padStart(2, "0");
-					const mm = String(time.getMinutes()).padStart(2, "0");
+		setRoom(code);
+		input.focus();
+	});
+}
 
-					const timeSpan = document.createElement("span");
 
-					timeSpan.className = "time";
-					timeSpan.textContent = hh + ":" + mm;
+/* =================================
+SETTINGS
+================================= */
 
-					const userSpan = document.createElement("span");
+let autoScroll = true;
 
-					userSpan.className = "user";
-					userSpan.textContent = "[" + user + "]";
 
-					const textSpan = document.createElement("span");
+/* =================================
+MESSAGE CREATOR
+================================= */
 
-					textSpan.className = "text";
-					textSpan.textContent = " : " + text;
+function addMessage(text, user = userCode, ts = Date.now()) {
 
-					msg.appendChild(timeSpan);
-					msg.appendChild(userSpan);
-					msg.appendChild(textSpan);
+	const msg = document.createElement("div");
+	msg.className = "message";
 
-					messages.appendChild(msg);
+	const time = new Date(ts);
+	const hh = String(time.getHours()).padStart(2, "0");
+	const mm = String(time.getMinutes()).padStart(2, "0");
 
-					if (autoScroll) {
+	const timeSpan = document.createElement("span");
+	timeSpan.className = "time";
+	timeSpan.textContent = hh + ":" + mm;
 
-						messages.scrollTop = messages.scrollHeight;
+	const userSpan = document.createElement("span");
+	userSpan.className = "user";
+	userSpan.textContent = "[" + user + "]";
 
-						}
+	const textSpan = document.createElement("span");
+	textSpan.className = "text";
+	textSpan.textContent = " : " + text;
 
-					}
+	msg.appendChild(timeSpan);
+	msg.appendChild(userSpan);
+	msg.appendChild(textSpan);
 
+	messages.appendChild(msg);
 
-					/* =================================
-					AUTO SCROLL
-					================================= */
+	if (autoScroll) {
+		messages.scrollTop = messages.scrollHeight;
+	}
+}
 
-					messages.addEventListener("scroll", () => {
 
-						const distance =
-						messages.scrollHeight -
-						messages.scrollTop -
-						messages.clientHeight;
+/* =================================
+AUTO SCROLL
+================================= */
 
-						autoScroll = distance < 50;
+messages.addEventListener("scroll", () => {
 
-						});
+	const distance =
+		messages.scrollHeight -
+		messages.scrollTop -
+		messages.clientHeight;
 
+	autoScroll = distance < 50;
+});
 
-		            /* DISCO TOKEN SYSTEM */
 
-		            const DAILY_TOKENS = 20;
-		            const MESSAGE_COST = 1;
+/* =================================
+DISCO TOKEN SYSTEM
+================================= */
 
-		            const TEST_TOKENS = 500;  // Your test balance
+const DAILY_TOKENS = 20;      // what a normal user gets per day
+const MESSAGE_COST = 1;       // tokens spent per message
 
-		            // Load balance
-		            // let tokens = Number(localStorage.getItem("tokens"));
-		            let tokens = TEST_TOKENS;
+// TEST_TOKENS: 500 is a dev-only balance, 25x the normal daily allowance.
+// It lets me spam-test sending and the "Insufficient tokens" path
+// without running dry. It must never reach customers.
+const TEST_TOKENS = 500;
 
-		            localStorage.setItem("tokens", tokens);
+// Dev mode: on localhost, or on any link that has ?dev in the URL
+// (remove the params.has("dev") line before customers use the site)
+const params = new URLSearchParams(location.search);
+const DEV_MODE =
+	location.hostname === "localhost" ||
+	location.hostname === "127.0.0.1" ||
+	params.has("dev");
 
-		            updateTokenDisplay();
-		            // Initialize balance
-		            if (!Number.isFinite(tokens) || tokens < 0) {
-		                tokens = DAILY_TOKENS;
-		                localStorage.setItem("tokens", tokens);
-		            }
+let tokens;
 
-		            // Display balance
-		            function updateTokenDisplay() {
-		                const display = document.getElementById("tokenBalance");
+if (DEV_MODE) {
+	tokens = TEST_TOKENS;
+} else {
+	const saved = localStorage.getItem("tokens");
+	tokens = saved === null ? DAILY_TOKENS : Number(saved);
+}
 
-		                if (display) {
-		                    display.textContent = tokens;
-		                }
-		            }
+if (!Number.isFinite(tokens) || tokens < 0) {
+	tokens = DAILY_TOKENS;
+}
 
-		            // Charge for message
-		            function payForMessage() {
+localStorage.setItem("tokens", tokens);
 
-		                if (tokens < MESSAGE_COST) {
-		                    addMessage("Insufficient tokens.", "SYSTEM");
-		                    return false;
-		                }
+// Display balance
+function updateTokenDisplay() {
+	const display = document.getElementById("tokenBalance");
 
-		                tokens -= MESSAGE_COST;
+	if (display) {
+		display.textContent = tokens;
+	}
+}
 
-		                localStorage.setItem("tokens", tokens);
+// Charge for message
+function payForMessage() {
 
-		                updateTokenDisplay();
+	if (tokens < MESSAGE_COST) {
+		addMessage("Insufficient tokens.", "SYSTEM");
+		return false;
+	}
 
-		                return true;
-		            }
+	tokens -= MESSAGE_COST;
 
-		            // Send message
-		            function sendMessage() {
+	localStorage.setItem("tokens", tokens);
 
-		                const text = input.value.trim();
+	updateTokenDisplay();
 
-		                if (!text) return;
+	return true;
+}
 
-		                if (!payForMessage()) return;
+// Send message (goes to the database; the listener shows it)
+function sendMessage() {
 
-		                addMessage(text, userCode);
+	const text = input.value.trim();
 
-		                input.value = "";
-		                input.focus();
-		            }
+	if (!text) return;
 
-		            updateTokenDisplay();
+	if (!payForMessage()) return;
 
+	db.ref("rooms/" + roomCode + "/messages").push({
+		user: userCode,
+		text: text.slice(0, 300),
+		ts: firebase.database.ServerValue.TIMESTAMP
+	});
 
-					/* =================================
-					ENTER KEY
-					================================= */
+	input.value = "";
+	input.focus();
+}
 
-					input.addEventListener("keydown", (e) => {
+updateTokenDisplay();
 
-						if (e.key === "Enter") {
 
-							e.preventDefault();
+/* =================================
+ENTER KEY
+================================= */
 
-							sendMessage();
+input.addEventListener("keydown", (e) => {
 
-							}
+	if (e.key === "Enter") {
+		e.preventDefault();
+		sendMessage();
+	}
+});
 
-						});
 
+/* =================================
+NEW USER ID (button hidden in HTML for now)
+================================= */
 
-						/* =================================
-						NEW USER ID
-						================================= */
+if (newIdBtn) {
+	newIdBtn.addEventListener("click", () => {
 
-						newIdBtn.addEventListener("click", () => {
+		const oldCode = userCode;
 
-							const oldCode = userCode;
+		// Generate a different identity
+		do {
+			userCode = generateCode();
+		} while (userCode === oldCode);
 
-							// Generate a different identity
-							do {
+		// Save new identity
+		localStorage.setItem("userCode", userCode);
 
-				 userCode = generateCode();
+		console.log("New User ID:", userCode);
 
-				 } while (userCode === oldCode);
+		input.focus();
+	});
+}
 
-							// Save new identity
-							localStorage.setItem("userCode", userCode);
 
-							// Notify chat
-							// addMessage(
+/* =================================
+WELCOME MESSAGES
+================================= */
 
+addMessage("Welcome to Disco.", "SYSTEM");
 
-		            // "Identity changed: [" + userCode + "]",
-						// "SYSTEM"
-					//	);
+addMessage("Room code: " + roomCode, "SYSTEM");
 
-							console.log("New User ID:", userCode);
 
-							input.focus();
+/* =================================
+START: enter the room (keep this last)
+================================= */
 
-							});
+setRoom(roomCode, false);
 
 
-							/* =================================
-							WELCOME MESSAGES
-							================================= */
+/* =================================
+DEBUG
+================================= */
 
-							addMessage("Welcome to Disco.", "SYSTEM");
-
-							addMessage("Room code: " + roomCode, "SYSTEM");
-
-
-							/* =================================
-							DEBUG
-							================================= */
-
-							console.log("User ID:", userCode);
-							console.log("Room ID:", roomCode);
+console.log("User ID:", userCode);
+console.log("Room ID:", roomCode);
