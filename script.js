@@ -1,6 +1,6 @@
 /* =================================
-DISCO - CHAT SYSTEM
-================================= */
+ D ISCO - CHAT SYSTEM               *
+ ================================= */
 
 
 /* HTML ELEMENTS */
@@ -13,32 +13,41 @@ const roomName = document.getElementById("roomName");
 
 
 /* =================================
-FIREBASE
-================================= */
+ F IREBASE                          *
+ ================================= */
 
 firebase.initializeApp({
 	databaseURL: "https://xhat667-default-rtdb.europe-west1.firebasedatabase.app"
 });
 
 const db = firebase.database();
-let roomQuery = null;
+let roomQuery = null; /* ==Then the 2nd thing */
+
+/*roomQuery.on("child_added", (snap) => {
+	const m = snap.val();
+	addMessage(m.text, m.user, m.ts); })};*/
+
 
 function joinRoom() {
 
-	if (roomQuery) roomQuery.off();   // stop listening to the old room
+	if (roomQuery) roomQuery.off();
 
-	roomQuery = db.ref("rooms/" + roomCode + "/messages").limitToLast(50);
+	roomQuery = db.ref("rooms/" + roomCode + "/messages")
+	.limitToLast(50);
 
 	roomQuery.on("child_added", (snap) => {
+
 		const m = snap.val();
+
 		addMessage(m.text, m.user, m.ts);
+
 	});
 }
 
 
 /* =================================
-CODE GENERATORS
-================================= */
+ C ODE GENERATORS                   *
+ ================================= */
 
 function generateCode() {
 
@@ -55,8 +64,8 @@ function generateCode() {
 
 
 /* =================================
-USER ID
-================================= */
+ U SER ID                           *
+ ================================= */
 
 let userCode = localStorage.getItem("userCode");
 
@@ -67,8 +76,8 @@ if (!userCode) {
 
 
 /* =================================
-ROOM ID
-================================= */
+ R OOM ID                           *
+ ================================= */
 
 function normalizeRoom(code) {
 	return String(code || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
@@ -122,15 +131,15 @@ if (changeRoomBtn) {
 
 
 /* =================================
-SETTINGS
-================================= */
+ S ETTINGS                          *
+ ================================= */
 
 let autoScroll = true;
 
 
 /* =================================
-MESSAGE CREATOR
-================================= */
+ M ESSAGE CREATOR                   *
+ ================================= */
 
 function addMessage(text, user = userCode, ts = Date.now()) {
 
@@ -166,23 +175,23 @@ function addMessage(text, user = userCode, ts = Date.now()) {
 
 
 /* =================================
-AUTO SCROLL
-================================= */
+ A UTO SCROLL                       *
+ ================================= */
 
 messages.addEventListener("scroll", () => {
 
 	const distance =
-		messages.scrollHeight -
-		messages.scrollTop -
-		messages.clientHeight;
+	messages.scrollHeight -
+	messages.scrollTop -
+	messages.clientHeight;
 
 	autoScroll = distance < 50;
 });
 
 
 /* =================================
-DISCO TOKEN SYSTEM
-================================= */
+ D ISCO TOKEN SYSTEM                *
+ ================================= */
 
 const DAILY_TOKENS = 20;      // what a normal user gets per day
 const MESSAGE_COST = 1;       // tokens spent per message
@@ -196,9 +205,9 @@ const TEST_TOKENS = 500;
 // (remove the params.has("dev") line before customers use the site)
 const params = new URLSearchParams(location.search);
 const DEV_MODE =
-	location.hostname === "localhost" ||
-	location.hostname === "127.0.0.1" ||
-	params.has("dev");
+location.hostname === "localhost" ||
+location.hostname === "127.0.0.1" ||
+params.has("dev");
 
 let tokens;
 
@@ -248,24 +257,46 @@ function sendMessage() {
 
 	if (!text) return;
 
-	if (!payForMessage()) return;
+	if (tokens < MESSAGE_COST) {
+		addMessage("Insufficient tokens.", "SYSTEM");
+		return;
+	}
 
-	db.ref("rooms/" + roomCode + "/messages").push({
+	const messageRef = db.ref(
+		"rooms/" + roomCode + "/messages"
+	).push();
+
+	messageRef.set({
+
 		user: userCode,
 		text: text.slice(0, 300),
-		ts: firebase.database.ServerValue.TIMESTAMP
+				   ts: firebase.database.ServerValue.TIMESTAMP
+
+	}, (error) => {
+
+		if (error) {
+
+			addMessage("Message failed: " + error.message, "SYSTEM");
+
+		} else {
+
+			tokens -= MESSAGE_COST;
+
+			localStorage.setItem("tokens", tokens);
+
+			updateTokenDisplay();
+
+			input.value = "";
+
+		}
+
+		input.focus();
+
 	});
-
-	input.value = "";
-	input.focus();
 }
-
-updateTokenDisplay();
-
-
 /* =================================
-ENTER KEY
-================================= */
+ E NTER KEY                         *
+ ================================= */
 
 input.addEventListener("keydown", (e) => {
 
@@ -277,8 +308,8 @@ input.addEventListener("keydown", (e) => {
 
 
 /* =================================
-NEW USER ID (button hidden in HTML for now)
-================================= */
+ N EW USER ID (button hidden in HTML* for now)
+ ================================= */
 
 if (newIdBtn) {
 	newIdBtn.addEventListener("click", () => {
@@ -301,8 +332,8 @@ if (newIdBtn) {
 
 
 /* =================================
-WELCOME MESSAGES
-================================= */
+ W ELCOME MESSAGES                  *
+ ================================= */
 
 addMessage("Welcome to Disco.", "SYSTEM");
 
@@ -310,15 +341,15 @@ addMessage("Room code: " + roomCode, "SYSTEM");
 
 
 /* =================================
-START: enter the room (keep this last)
-================================= */
+ S TART: enter the room (keep this l*ast)
+ ================================= */
 
 setRoom(roomCode, false);
 
 
 /* =================================
-DEBUG
-================================= */
+ D EBUG                             *
+ ================================= */
 
 console.log("User ID:", userCode);
 console.log("Room ID:", roomCode);
