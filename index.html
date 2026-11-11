@@ -1,60 +1,71 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Page settings -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<title>DISCO</title>
+    <title>DISCO</title>
 
-	<link rel="stylesheet" href="styles.css">
+    <!-- Disco styling -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
-	<div class="chat-window">
+    <!-- Main chat window -->
+    <div class="chat-window">
 
-		<!-- HEADER -->
-		<div class="header">
+        <!-- Header: room, tokens and controls -->
+        <div class="header">
 
-			<div class="room-name" id="roomName">
-				-- ROOM --
-			</div>
+            <!-- Current room name -->
+            <div class="room-name" id="roomName">
+                -- ROOM --
+            </div>
 
-			<div class="token-display">
-				TOKENS: <span id="tokenBalance">0</span>
-			</div>
+            <!-- Starting token display -->
+            <div class="token-display">
+                TOKENS: <span id="tokenBalance">200</span>
+            </div>
 
-			<button id="changeRoomBtn" class="new-id-btn">ROOM</button>
+            <!-- Change room button -->
+            <button id="changeRoomBtn" class="new-id-btn">ROOM</button>
 
-			<button id="newIdBtn" class="new-id-btn" hidden>NEW ID</button>
+            <!-- Generate a new user ID -->
+            <button id="newIdBtn" class="new-id-btn" hidden>NEW ID</button>
 
-		</div>
+        </div>
 
-		<!-- CHAT -->
-		<div class="chat-log" id="messages"></div>
+        <!-- Chat message history -->
+        <div class="chat-log" id="messages"></div>
 
-		<!-- INPUT -->
-		<div class="input-bar">
+        <!-- Message input area -->
+        <div class="input-bar">
 
-			<div class="prompt">&gt;</div>
+            <!-- Terminal-style prompt -->
+            <div class="prompt">&gt;</div>
 
-			<input
-				id="messageInput"
-				type="text"
-				placeholder="Type message..."
-				autocomplete="off"
-			>
+            <!-- User message field -->
+            <input
+                id="messageInput"
+                type="text"
+                placeholder="Type message..."
+                autocomplete="off"
+            >
 
-		</div>
+        </div>
 
-	</div>
+    </div>
 
-	<!-- Firebase (must load before script.js) -->
-	<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <!-- Firebase SDK: load before the application -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-	<script src="script.js"></script>
+    <!-- Disco application logic -->
+    <script src="script.js"></script>
 
 </body>
 </html>
