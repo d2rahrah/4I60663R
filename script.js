@@ -195,11 +195,11 @@ messages.addEventListener("scroll", () => {
 
 const DAILY_TOKENS = 20;      // what a normal user gets per day
 const MESSAGE_COST = 1;       // tokens spent per message
-
+const TOKENS = 20;			//Starting balance
 // TEST_TOKENS: 500 is a dev-only balance, 25x the normal daily allowance.
 // It lets me spam-test sending and the "Insufficient tokens" path
 // without running dry. It must never reach customers.
-const TEST_TOKENS = 500;
+// const TEST_TOKENS = 500;
 
 // Dev mode: on localhost, or on any link that has ?dev in the URL
 // (remove the params.has("dev") line before customers use the site)
@@ -257,20 +257,36 @@ function sendMessage() {
 
 	if (!text) return;
 
+	// commands are free and never go to the database
+	if (text === "/top") {
+		showTop();
+		input.value = "";
+		return;
+	}
+
+	if (text.startsWith("/join ")) {
+		const code = normalizeRoom(text.slice(6));
+		if (code.length >= 3) setRoom(code);
+		else addMessage("Room code too short.", "SYSTEM");
+		input.value = "";
+		return;
+	}
+
+	// check the balance, but only charge after the write succeeds
 	if (tokens < MESSAGE_COST) {
 		addMessage("Insufficient tokens.", "SYSTEM");
 		return;
 	}
 
-	const messageRef = db.ref(
-		"rooms/" + roomCode + "/messages"
-	).push();
+	const room = roomCode;   // remember the room in case it changes mid-send
+
+	const messageRef = db.ref("rooms/" + room + "/messages").push();
 
 	messageRef.set({
 
 		user: userCode,
 		text: text.slice(0, 300),
-				   ts: firebase.database.ServerValue.TIMESTAMP
+		ts: firebase.database.ServerValue.TIMESTAMP
 
 	}, (error) => {
 
@@ -281,17 +297,18 @@ function sendMessage() {
 		} else {
 
 			tokens -= MESSAGE_COST;
-
 			localStorage.setItem("tokens", tokens);
-
 			updateTokenDisplay();
 
 			input.value = "";
 
+			// count this message for the top list
+			const stats = db.ref("stats/" + room);
+			stats.child("count").transaction((c) => (c || 0) + 1);
+			stats.child("last").set(firebase.database.ServerValue.TIMESTAMP);
 		}
 
 		input.focus();
-
 	});
 }
 /* =================================
