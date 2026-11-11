@@ -387,5 +387,11 @@ body {
 				 padding: 12px;
 
 				 }
+				 .token-display {
+					 font-size: 11px;
+				 }
 
+				 .new-id-btn {
+					 padding: 7px 10px;
+				 }
 						}
