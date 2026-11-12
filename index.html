@@ -66,6 +66,23 @@
 
     <!-- Disco application logic -->
     <script src="script.js"></script>
+<script>
+const hud = document.querySelector(".hud");
 
+hud.addEventListener("mousemove", (event) => {
+  const rect = hud.getBoundingClientRect();
+
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+
+  hud.style.setProperty("--mouse-x", `${x}px`);
+  hud.style.setProperty("--mouse-y", `${y}px`);
+});
+
+hud.addEventListener("mouseleave", () => {
+  hud.style.setProperty("--mouse-x", "50%");
+  hud.style.setProperty("--mouse-y", "50%");
+});
+</script>
 </body>
 </html>
