@@ -1,2 +1,2 @@
-A Chat program
-join  same room
+<h1> A Chat program </h1>
+<h2>join  same room </h2>
