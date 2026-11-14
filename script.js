@@ -195,7 +195,7 @@ messages.addEventListener("scroll", () => {
 
 const DAILY_TOKENS = 20;      // what a normal user gets per day
 const MESSAGE_COST = 1;       // tokens spent per message
-const TOKENS = 20;			//Starting balance
+const TOKENS = 200;			//Starting balance
 // TEST_TOKENS: 500 is a dev-only balance, 25x the normal daily allowance.
 // It lets me spam-test sending and the "Insufficient tokens" path
 // without running dry. It must never reach customers.
