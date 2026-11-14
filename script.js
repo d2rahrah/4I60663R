@@ -193,7 +193,7 @@ messages.addEventListener("scroll", () => {
  D ISCO TOKEN SYSTEM                *
  ================================= */
 
-const DAILY_TOKENS = 20;      // what a normal user gets per day
+const DAILY_TOKENS = 2000;      // what a normal user gets per day
 const MESSAGE_COST = 1;       // tokens spent per message
 const TOKENS = 200;			//Starting balance
 // TEST_TOKENS: 500 is a dev-only balance, 25x the normal daily allowance.
